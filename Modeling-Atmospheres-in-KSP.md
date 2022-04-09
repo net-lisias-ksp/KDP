@@ -453,25 +453,16 @@ Gas constant, R = 8.3144621 J/mol-K
 
 Below is a description of each spreadsheet column and the formulas used:
 
-Column A – geometric height, z (meters).
-
-Column B – 0.8 × geometric height, z’ (meters).  Used in temperature calculations.
-
-Column C – geopotential height, h (m’).  h = ro × z / (ro + z).  Used in pressure calculations.
-
-Column D – `temperatureCurve`.  Base temperature, function of z’.
-
-Column E – `temperatureSunMultCurve`.  Function of z’.
-
-Column F – Mean temperature at 38° latitude, T (K).  Column D + Column E × ½ diurnal variation.
-
-Column G – Molar mass, M (kg/mol).
-
-Column H – Scale height, H (meters).  H = (R × T) / (M × go)
-
-Column I – Air pressure, P (Pascals).  P2 = P1 × EXP[ (h1 – h2) / ((H1 + H2) / 2) ]
-
-Column J – Air density (kg/m^2).  ρ = (P × M) / (R × T).
+* Column A – geometric height, z (meters).
+* Column B – 0.8 × geometric height, z’ (meters).  Used in temperature calculations.
+* Column C – geopotential height, h (m’).  h = ro × z / (ro + z).  Used in pressure calculations.
+* Column D – `temperatureCurve`.  Base temperature, function of z’.
+* Column E – `temperatureSunMultCurve`.  Function of z’.
+* Column F – Mean temperature at 38° latitude, T (K).  Column D + Column E × ½ diurnal variation.
+* Column G – Molar mass, M (kg/mol).
+* Column H – Scale height, H (meters).  H = (R × T) / (M × go)
+* Column I – Air pressure, P (Pascals).  P2 = P1 × EXP[ (h1 – h2) / ((H1 + H2) / 2) ]
+* Column J – Air density (kg/m^2).  ρ = (P × M) / (R × T).
 
 Note that the computations are using Pandora’s life-sized radius.  It is necessary to always use life-sized dimensions to produce a realistic atmosphere.  When producing an atmosphere for a stock-sized body, we want to scale up its radius by a factor of 10X.  For example, if modeling an atmosphere for Duna, we make `ro` = 3,200,000 m.  We typically want to use the same go value as is used in the game, but there may be some circumstances when we want to change it.  The intent is to develop the atmosphere using a *realistic* life-sized analog of the stock-sized body.  So, if the scaled up body has an unrealistic density, we might want to change the gravity to bring the density to a believable value.
 
@@ -551,7 +542,7 @@ where `E` is the [eccentric anomaly](https://en.wikipedia.org/wiki/Eccentric_ano
 
 This method may sound like an awful lot of trouble just to determine where to end an atmosphere, but it’s not so bad once all the formulas are entered into the spreadsheet.  To make things easy, the sample spreadsheet already includes the formulas (see screenshot below).  It’s also not necessary to bother with graphs and the like; those above were produced just to demonstrate the method.  I generally end my atmospheres based on a simple rule of thumb:
 
-·  For a stock-sized terrestrial planet or moon, set the edge of the atmosphere at such altitude that, at a time 10 seconds past entry interface, the dynamic pressure is equal to 150 Pa.
+* For a stock-sized terrestrial planet or moon, set the edge of the atmosphere at such altitude that, at a time 10 seconds past entry interface, the dynamic pressure is equal to 150 Pa.
 
 Of course, with any atmosphere, you will probably want to round off the height to some convenient number.
 
@@ -1469,11 +1460,11 @@ all temperatures<br>
 
 Let’s compute the adiabatic index for Pandora, where we assume the following composition.
 
-Nitrogen = 55%
-Oxygen = 21%
-Carbon Dioxide =18%
-Xenon = 5.5%
-Methane = 0.5%
+* Nitrogen = 55%
+* Oxygen = 21%
+* Carbon Dioxide =18%
+* Xenon = 5.5%
+* Methane = 0.5%
 
 It is common for the abundances of atmospheric gases to be given by *volume*, thus, the percentages represent the mole fractions.  If we have a situation where the abundances are by *mass*, then a conversion to volumetric proportions is necessary.
 
