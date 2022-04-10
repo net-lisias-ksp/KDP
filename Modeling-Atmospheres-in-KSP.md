@@ -1,3 +1,57 @@
+<style>
+.formula {
+	margin:0in 0.15in 8pt;
+    font-size:16px;
+    font-family:verdana, geneva, sans-serif;
+    line-height:150%;
+	text-indent: -0.15in;
+    padding-left: 0.25in;
+}
+table {
+	width:432.15pt;
+	border-collapse:collapse;
+}
+tr {
+	height:15.75pt;
+}
+td {
+	border-width:1px 1pt 1pt;
+	border-style:none solid solid;
+	border-color:rgb(0,0,0);
+	padding:0in 5.4pt;
+	width:48pt;
+	height:15.75pt;
+	background-color:transparent;
+	font-size:10pt;
+	font-family:Verdana, sans-serif;
+	margin:0in 0in 0pt;
+	text-align:center;
+	line-height:normal;
+}
+td.header {
+	border-width:1pt 1pt 1pt 1px;
+	border-style:solid solid solid solid;
+	border-color:rgb(0,0,0);
+	padding:0in 5.4pt;
+	width:48pt;
+	height:15.75pt;
+	background-color:transparent;
+	text-align:center;
+	font-weight:bold;
+}
+td.header2 {
+	border-width:1pt 1pt 2pt 1px;
+	border-style:solid solid double solid;
+	border-color:rgb(0,0,0);
+	padding:0in 5.4pt;
+	width:48pt;
+	height:15.75pt;
+	background-color:transparent;
+	text-align:center;
+	font-weight:bold;
+}
+</style>
+
 # A Method for Modeling Atmospheres in Kerbal Space Program
 
 In recent months I have become rather proficient at developing atmospheric models for Kerbal Space Program.  It started with my own mod, [Realistic Atmospheres](https://forum.kerbalspaceprogram.com/index.php?/topic/128858-112-realistic-atmospheres/), in December-2015.  Since then I have developed atmospheres for [Real Solar System](https://forum.kerbalspaceprogram.com/index.php?/topic/50471-112-real-solar-system-v1120-may-7/), [Outer Planets Mod](https://forum.kerbalspaceprogram.com/index.php?/topic/93999-112-outer-planets-mod-20-complete-overhaul-better-terrain-nicer-terrain-textures-improved-scatter-etc-21-may/), [Revamped Stock Solar System](https://forum.kerbalspaceprogram.com/index.php?/topic/134360-112-v04-revamped-stock-solar-system/), and others.  Throughout the process I have steadily improved and formalized by methods.  In this tutorial I describe my technique so that other developers can, if they want to, use it to create their own atmospheres.
@@ -69,13 +123,23 @@ The names of the curves listed above and throughout this article are those used 
 
 To develop a temperature model, the best place to start is to estimate the planet’s global mean temperature.  For our Pandora example we already have this, 280 K.  But let’s say we are starting from scratch and need to make an initial estimate.  A good first step is to compute the planet’s [effective temperature](https://en.wikipedia.org/wiki/Effective_temperature).  This can be done using the following equation,
 
+<!--
 	Teff = ( I × (1 – α) / (4 × σ) ) ^ 0.25
+-->
+<p class="formula">
+T<sub>eff</sub> = ( I × (1 – α) / (4 × σ) ) <sup>0.25</sup>
+</p>
 
 where I is the [solar irradiance](https://en.wikipedia.org/wiki/Solar_irradiance) (W/m2), α is the [albedo](https://en.wikipedia.org/wiki/Albedo), and σ is the [Stefan-Boltzmann constant](https://en.wikipedia.org/wiki/Stefan–Boltzmann_constant) (5.6704×10^-8 Wm^-2K^-4).
 
 In KSP the solar irradiance at Kerbin is defined as 1360 W/m2.  For other planets it can be computed using,
 
+<!--
 	I = 1360 / D^2
+-->
+<p class="formula">
+I = 1360 / D<sup>2</sup>
+</p>
 
 where *D* is the planet’s distance from the sun expressed as a ratio of Kerbin’s distance, i.e. the Kerbin solar system’s version of the [astronomical unit](https://en.wikipedia.org/wiki/Astronomical_unit) (AU).
 
@@ -83,9 +147,17 @@ Albedo is the fraction of the incoming solar radiation that a body reflects.  Pl
 
 For an example, let’s compute Eve’s effective temperature, where Eve’s distance from the sun is 0.723 AU and its albedo is 0.45.
 
+<!--
 	I = 1360 / 0.723^2 = 2602 W/m^2
 
 	Teff = (2602 × (1 - 0.45) / (4 × 5.6704E-08))^0.25 = 282 K
+-->
+<p class="formula">
+I = 1360 / 0.723<sup>2</sup> = 2602 W/m<sup>2</sup>
+</p>
+<p class="formula">
+T<sub>eff</sub> = (2602 × (1 - 0.45) / (4 × 5.6704E-08))<sup>0.25</sup> = 282 K
+</p>
 
 For an airless body, the effective temperature is a good estimate of the body’s globally averaged temperature.  However, for a planet with an atmosphere, the surface temperature will be warmer because of the [greenhouse effect](https://en.wikipedia.org/wiki/Greenhouse_effect).
 
@@ -97,9 +169,17 @@ For Pandora, we known the moon’s temperature, but we know nothing about its di
 
 Pandora’s temperature is 280 K.  Given its thick atmosphere and abundance of [greenhouse gases](https://en.wikipedia.org/wiki/Greenhouse_gas), let’s assume its greenhouse effect is +40 K.  This gives the moon an effective temperature of 240 K.  Let’s also assume that Pandora orbits the stock sun at a distance of 1.10 AU.  We can now rearrange the effective temperature equation to calculate Pandora’s albedo,
 
+<!--
 	I = 1360 / 1.10^2 = 1124 W/m^2
 
 	α = 1 – (4 × σ × Teff^4) / I = 1 – (4 × 5.6704E-08 × 240^4) / 1124 = 0.33
+-->
+<p class="formula">
+I = 1360 / 1.10<sup>2</sup> = 1124 W/m<sup>2</sup>
+</p>
+<p class="formula">
+α = 1 – (4 × σ × T<sub>eff</sub><sup>4</sup>) / I = 1 – (4 × 5.6704E-08 × 240<sup>4</sup>) / 1124 = 0.33
+</p>
 
 ### Latitudinal Variation
 
@@ -109,7 +189,12 @@ The next step is to determine the latitudinal temperature variation.  We start b
 
 Although the equator-to-pole temperature difference is mostly a guesstimate, I have found that the temperature change as we move from equator to pole is proportional to the cosine of the latitude.  Unless there is better data to work from, we should make our latitude bias curve approximate the following function,
 
+<!--
 	temperatureLatitudeBiasCurve  ≈  ΔT × ( COS(latitude) – COS(38°) )
+-->
+<p class="formula">
+temperatureLatitudeBiasCurve&nbsp; ≈&nbsp; ΔT × ( COS(latitude) – COS(38°) )
+</p>
 
 where ΔT is the difference in nighttime temperature between be the planet’s equator and its poles (absolute value).
 
@@ -138,7 +223,12 @@ We now must determine the [diurnal temperature variation](https://en.wikipedia.o
 
 Based on solar insolation alone, the diurnal variation should vary as a function of the cosine of the latitude, which can be expressed as,
 
+<!--
 	temperatureLatitudeSunMultCurve  ≈  (ΔTE – ΔTP) × COS(latitude) + ΔTP
+-->
+<p class="formula">
+temperatureLatitudeSunMultCurve&nbsp; ≈&nbsp; (ΔT<sub>E</sub> – ΔT<sub>P</sub>) × COS(latitude) + ΔT<sub>P</sub>
+</p>
 
 where ΔTE is the diurnal variation at the equator, and ΔTP is the diurnal variation at the poles.  Note that here the value of ΔTP is the temperature range seen over a single rotation period, not to be confused with the long days and nights caused by the seasons.
 
@@ -190,7 +280,12 @@ We also find that the datum level base temperature, i.e. the nighttime temperatu
 
 `sunDotNormalized` can also be computed from the [hour angle](https://en.wikipedia.org/wiki/Hour_angle) (HRA), which is the angle between the meridian passing through the sun and the meridian passing through the location at which we want to know the temperature.  The hour angle is zero at solar noon, negative before noon, and positive after noon.  In order to shift the hottest time of day (`sunDotNormalized` = 1) from noon to mid-afternoon, the HRA is reduced by 45°.
 
+<!--
 	sunDotNormalized = 0.5 × COS(HRA – 45°) + 0.5
+-->
+<p class="formula">
+sunDotNormalized = 0.5 × COS(HRA – 45°) + 0.5
+</p>
 
 In the figure below we see how the hour angle and `sunDotNormalized` vary throughout a day.  So, for example, if we want to know the temperature at noon at 38° latitude, we have, 274 + 12 × 0.8536 = 284.2 K.
 
@@ -284,7 +379,12 @@ True anomaly should be expressed as a positive number, so if negative, add 360°
 
 The value of `temperatureAxialSunBiasCurve` typically represents the temperature variation at the planet’s poles, i.e. the place where the annual range of temperature is greatest.  If we let ΔT equal the planet’s maximum annual range of temperature, we have
 
+<!--
 	temperatureAxialSunBiasCurve  ≈  –0.5 × ΔT × SIN(ν – 36 + ω)
+-->
+<p class="formula">
+temperatureAxialSunBiasCurve&nbsp; ≈&nbsp; –0.5 × ΔT × SIN(<i>ν</i> – 36 + ω)
+</p>
 
 For latitudes where the temperature range is less than the maximum, we apply a factor, the value of which is given by `temperatureAxialSunMultCurve`.  This curve takes latitude and returns a multiplier that is typically equal to 0 at the equator (no variation) and 1 at the poles (maximum variation).
 
@@ -383,15 +483,30 @@ Nothing here looks unusual or out of place, so we can accept the temperature cur
 
 There is one final temperature item that we must check off the list.  A value should be assigned to the parameter temperatureSeaLevel.  This is the temperature displayed in the planet information panel in the Tracking Station.  For this I like to use the global mean surface temperature, which should be approximately equal to the temperature at 38° latitude.  For Pandora, we have
 
+<!--
 	temperatureSeaLevel = 280
+-->
+<p class="formula">
+temperatureSeaLevel = 280
+</p>
 
 It’s also possible to compute the global mean temperature from a sampling of surface temperatures.  This may be necessary if we have some unusual temperature variations that do not neatly follow the default functions.  The globally averaged temperature can be computed using the following,
 
+<!--
 	Tmean = 0.5 × [ (T0 + T10) × (sin 10 – sin 0) + … + (T80 + T90) × (sin 90 – sin 80) ]
+-->
+<p class="formula">
+T<sub>mean</sub> = 0.5 × [ (T<sub>0</sub> + T<sub>10</sub>) × (sin 10 – sin 0) + … + (T<sub>80</sub> + T<sub>90</sub>) × (sin 90 – sin 80) ]
+</p>
 
 where Tn is the mean annual temperature at latitude n, which is calculated from,
 
+<!--	
 	base temperature + latitudinal offset + ½ diurnal variation.
+-->
+<p class="formula">
+base temperature + latitudinal offset + ½ diurnal variation.
+</p>
 
 Note that we ignore seasonal and eccentricity variations.  Globally, seasonal variation balances out because one hemisphere is simply the inverse of the other.  We can also assume eccentricity variation balances, though it is actually skewed very slightly toward the apoapsis temperature because the planet spends more time there than near periapsis.
 
@@ -401,13 +516,23 @@ In the given equation, we’re taking temperatures at every 10° of latitude. Ot
 
 Atmospheric pressure decreases [exponentially](https://en.wikipedia.org/wiki/Exponential_function) with increasing height.  The change in pressure between any two altitudes is given the equation,
 
+<!--
 	P2 = P1 × e^((z1 – z2) / H)
+-->
+<p class="formula">
+P<sub>2</sub> = P<sub>1</sub> × e<sup> ((z</sup><sup> – z</sup><sup>2) / H)</sup>
+</p>
 
 where `P1` is the pressure at altitude `z1`, `P2` is the pressure at altitude `z2`, and H is the [scale height](https://en.wikipedia.org/wiki/Scale_height).  The equation works with any units, but for this tutorial the practice will be to express altitudes in meters and pressure in Pascals (unless otherwise noted).
 
 Scale height is calculated using the equation,
 
+<!--
 	H = (R × T) / (M × g)
+-->
+<p class="formula">
+H = (R × T) / (M × g)
+</p>
 
 where `R` is the universal [gas constant](https://en.wikipedia.org/wiki/Gas_constant) (8.3144621 J/mol-K), `T` is the temperature (K), `M` is the molar mass (kg/mol), and `g` is the [acceleration of gravity](https://en.wikipedia.org/wiki/Gravitational_acceleration) (m/s2).
 
@@ -417,15 +542,28 @@ We’ve defined z as the altitude, but more specifically it is the *geometric he
 
 It is customary in atmosphere calculations to effectively eliminate the variable portion of the acceleration of gravity by transforming geometric height to [geopotential height](https://en.wikipedia.org/wiki/Geopotential_height).  The transformation is,
 
+<!--
 	h = ro × z / (ro + z)
+-->
+<p class="formula">
+h = r<sub>o</sub> × z / (r<sub>o</sub> + z)
+</p>
 
 where `h` is geopotential height, and `ro` is the radius of the planet at the datum (meters).  The unit for geopotential height is the geopotential meter, m’.
 
 We can now rewrite the equations as follows,
 
+<!--
 	P2 = P1 × e ((h1 – h2) / H)
 
 	H = (R × T) / (M × go)
+-->
+<p class="formula">
+P<sub>2</sub> = P<sub>1</sub> × e<sup> ((h</sup>sup> – h</sup><sup>2) / H)</sup>
+</p>
+<p class="formula">
+H = (R × T) / (M × g<sub>o</sub>)
+</p>
 
 where `go` is the acceleration of gravity at h=0.
 
@@ -445,11 +583,18 @@ We are now ready to compute pressure versus height.  We do so using the followin
 
 For Pandora, the following constants are used for the purposes of computation:
 
+<!--
 Radius, ro = 5,723,500 m
 Surface gravity, go = 7.848 m/s^2
 Surface pressure, Po = 91192.5 Pa
 Molar mass, M = 0.0374 kg/mol
 Gas constant, R = 8.3144621 J/mol-K
+-->
+<p class="formula">Radius, r<sub>o</sub> = 5,723,500 m</p>
+<p class="formula">RSurface gravity, g<sub>o</sub> = 7.848 m/s<sup>2</sup></p>
+<p class="formula">RSurface pressure, P<sub>o</sub> = 91192.5 Pa</p>
+<p class="formula">RMolar mass, M = 0.0374 kg/mol</p>
+<p class="formula">RGas constant, R = 8.3144621 J/mol-K</p>
 
 Below is a description of each spreadsheet column and the formulas used:
 
@@ -504,29 +649,60 @@ So just how do we go about making these comparisons?  First, it is essential to 
 
 The first step is to calculate the planet’s [gravitational parameter](https://en.wikipedia.org/wiki/Standard_gravitational_parameter), `μ`.  This is done using the following equation,
 
+<!--
 	μ = go × ro^2
+-->
+<p class="formula">
+μ = g<sub>o</sub> × r<sub>o</sub><sup>2</sup>
+</p>
 
 For Pandora we know that `go` = 7.848 m/s^2.  Pandora’s life-sized radius is 5723.5 km.  For the stock-sized version, let’s factor it by 0.1, round off, and call it 570 km.  Therefore,
 
+<!--
 	μ = 7.848 × 570000^2 = 2.5498152×1012 m^3/s^2
+-->
+<p class="formula">
+μ = 7.848 × 570000<sup>2</sup> = 2.5498152×10<sup>12</sup> m<sup>3</sup>/s<sup>2</sup>
+</p>
 
 Next we need equations for escape velocity and dynamic pressure,
 
+<!--
 	vesc = (2 × μ / r)^0.5
 
 	q = ρ × vesc^2 / 2
+-->
+<p class="formula">
+v<sub>esc</sub> = (2 × μ / r)<sup>0.5</sup>
+</p>
+<p class="formula">
+q = ρ × v<sub>esc</sub><sup>2</sup> / 2
+</p>
 
 where `vesc` is escape velocity, `q` is dynamic pressure (at escape velocity), and `ρ` is air density.
 
 We also need a method for computing the elapsed time from *entry interface*, which is the point where the vehicle intersects the atmosphere.  We first compute the angle from periapsis, i.e. the true anomaly, `ν`.  (Since we are approaching periapsis, true anomaly is negative.)
 
+<!--
 	ν  = –ACOS[ (a × (1 – e2) / r – 1) / e ]
+-->
+<p class="formula">
+<i>ν</i>&nbsp;= –ACOS[ (a × (1 – e<sup>2</sup>) / r – 1) / e ]
+</p>
 
 The assumption is that we are traveling at escape velocity (a = 0, e = 1); unfortunately the equations blow up when we do that.  Instead, we approximate the true anomaly by using an elliptical orbit with an extreme eccentricity.  For instance,
 
+<!--
 	a = 100000 × rp
 
 	e = 0.99999
+-->
+<p class="formula">
+a = 100000 × r<sub>p</sub>
+</p>
+<p class="formula">
+e = 0.99999
+</p>
 
 where `a` is the [semimajor axis](https://en.wikipedia.org/wiki/Semi-major_and_semi-minor_axes), `e` is the eccentricity, and `rp` is the periapsis radius (planet radius + periapsis altitude).
 
@@ -534,9 +710,17 @@ The value of `rp` should produce an entry angle that is neither too step nor too
 
 We now compute the time from periapsis as follows,
 
+<!--
 	E = ACOS[ (e + cos ν) / (1 + e × cos ν) ]
 
 	t = (E – e × sin E) × (a^3 / μ)^0.5
+-->
+<p class="formula">
+E = ACOS[ (e + cos <i>ν</i>) / (1 + e × cos <i>ν</i>) ]
+</p>
+<p class="formula">
+t = (E – e × sin E) × (a<sup>3</sup> / μ)<sup>0.5</sup>
+</p>
 
 where `E` is the [eccentric anomaly](https://en.wikipedia.org/wiki/Eccentric_anomaly) (must be expressed in radians), and t is the time from periapsis in seconds.  To get the time from entry interface, we simply take `tinterface–t`.
 
@@ -554,7 +738,12 @@ Deciding where to end the atmosphere of a giant planet can be more difficult tha
 
 I don’t have correct formulas for aerodynamic heating rate, but we can manage without.  Since we’re using the heating rate just to make comparisons, the actual units of measure are unimportant.  We can therefore use a proxy, as follows
 
+<!--
 	Q̇ ∝ 10^-6 × ρ^0.5 × v^3
+-->
+<p class="formula">
+Q̇ ∝ 10<sup>-6</sup> × ρ<sup>0.5 </sup>× v<sup>3</sup>
+</p>
 
 where the 10^-6 is added to keep the numbers from getting cumbersomely large.
 
@@ -672,791 +861,201 @@ There are several additional parameters to which we must assign a value.  One of
 
 The value of the adiabatic index is assigned to the parameter `adiabaticIndex`.  We compute it using the following equation,
 
+<!--
 	ϒ = (x1Cp1 + x2Cp2 + …) / ((x1Cp1 + x2Cp2 + …) – 8.3145)
+-->
+<p class="formula">
+ϒ = (x<sub>1</sub>C<sub>p1</sub> + x<sub>2</sub>C<sub>p2</sub> + …) / ((x<sub>1</sub>C<sub>p1</sub> + x<sub>2</sub>C<sub>p2</sub> + …) – 8.3145)
+</p>
 
 where `ϒ` is the adiabatic index, the `x`’s are the [mole fractions](https://en.wikipedia.org/wiki/Mole_fraction) of each gas, and the `Cp`’s are the constant-pressure [specific heat capacities](https://en.wikipedia.org/wiki/Heat_capacity) of each gas.
 
 Values of `Cp` for some common atmospheric gases are given in the following table.
 
-<table border="0" cellpadding="0" cellspacing="0" style="width:432.15pt;border-collapse:collapse;" width="576"><tbody><tr style="height:15.75pt;"><td nowrap="nowrap" style="border-width:1pt 1pt 0px;border-style:solid solid none;border-color:rgb(0,0,0);padding:0in 5.4pt;width:48pt;height:15.75pt;background-color:transparent;" width="64">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<b><span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">Temp.</font></span></b>
-</p>
-</td>
-<td colspan="8" nowrap="nowrap" style="border-width:1pt 1pt 1pt 0px;border-style:solid solid solid none;border-color:#000000 rgb(0,0,0);padding:0in 5.4pt;width:384.15pt;height:15.75pt;background-color:transparent;" width="512">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<b><span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">Constant Pressure Specific Heat Capacity, C</font><sub><font color="#000000" size="2">p</font></sub><font color="#000000"> (J/mol-K)</font></span></b>
-</p>
-</td>
-</tr><tr style="height:15.75pt;"><td nowrap="nowrap" style="border-width:0px 1pt 2.25pt;border-style:none solid double;border-color:rgb(0,0,0);padding:0in 5.4pt;width:48pt;height:15.75pt;background-color:transparent;" width="64">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<b><span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">(K)</font></span></b>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 2.25pt 0px;border-style:none solid double none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<b><span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">H</font><sub><font color="#000000" size="2">2</font></sub></span></b>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 2.25pt 0px;border-style:none solid double none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<b><span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">N</font><sub><font color="#000000" size="2">2</font></sub></span></b>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 2.25pt 0px;border-style:none solid double none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<b><span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">O</font><sub><font color="#000000" size="2">2</font></sub></span></b>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 2.25pt 0px;border-style:none solid double none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<b><span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">H</font><sub><font color="#000000" size="2">2</font></sub><font color="#000000">O</font></span></b>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 2.25pt 0px;border-style:none solid double none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<b><span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">NH</font><sub><font color="#000000" size="2">3</font></sub></span></b>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 2.25pt 0px;border-style:none solid double none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<b><span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">CH</font><sub><font color="#000000" size="2">4</font></sub></span></b>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 2.25pt 0px;border-style:none solid double none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<b><span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">CO</font><sub><font color="#000000" size="2">2</font></sub></span></b>
-</p>
-</td>
-<td nowrap="nowrap" rowspan="19" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) #000000 rgb(0,0,0);padding:0in 5.4pt;width:39.4pt;height:15.75pt;background-color:transparent;" width="53">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">He, Ne, Ar,<br>
+<table border="0" cellpadding="0" cellspacing="0" width="576"><tbody>
+<tr>
+<td nowrap="nowrap" width="64" class="header">Temp.</td>
+<td colspan="8" nowrap="nowrap" width="512" class="header">Constant Pressure Specific Heat Capacity, C<sub>p</sub> (J/mol-K)</td>
+</tr>
+<tr>
+<td nowrap="nowrap" width="64" class="header2">(K)</td>
+<td nowrap="nowrap" width="66" class="header2">H<sub>2</sub></td>
+<td nowrap="nowrap" width="66" class="header2">N<sub>2</sub></span></td>
+<td nowrap="nowrap" width="66" class="header2">O<sub>2</sub></span></td>
+<td nowrap="nowrap" width="66" class="header2">H<sub>2</sub>O</span></td>
+<td nowrap="nowrap" width="66" class="header2">NH<sub>3</sub></span></td>
+<td nowrap="nowrap" width="66" class="header2">CH<sub>4</sub></span></td>
+<td nowrap="nowrap" width="66" class="header2">CO<sub>2</sub></span></td>
+<td nowrap="nowrap" rowspan="19" width="53"> 
+He, Ne, Ar,<br>
 Kr &amp; Xe,<br>
 all temperatures<br>
-= 20.8</font></span>
-</p>
-</td>
-</tr><tr style="height:15.75pt;"><td nowrap="nowrap" style="border-width:0px 1pt 1pt;border-style:none solid solid;border-color:rgb(0,0,0);padding:0in 5.4pt;width:48pt;height:15.75pt;background-color:transparent;" width="64">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">100</font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">28.2 </font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">29.1 </font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">29.1 </font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">33.3 </font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">33.3 </font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">33.3 </font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">29.2 </font></span>
-</p>
-</td>
-</tr><tr style="height:15.75pt;"><td nowrap="nowrap" style="border-width:0px 1pt 1pt;border-style:none solid solid;border-color:rgb(0,0,0);padding:0in 5.4pt;width:48pt;height:15.75pt;background-color:transparent;" width="64">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">125</font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">27.9 </font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">29.1 </font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">29.1 </font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">33.3 </font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">33.3 </font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">33.3 </font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">29.7 </font></span>
-</p>
-</td>
-</tr><tr style="height:15.75pt;"><td nowrap="nowrap" style="border-width:0px 1pt 1pt;border-style:none solid solid;border-color:rgb(0,0,0);padding:0in 5.4pt;width:48pt;height:15.75pt;background-color:transparent;" width="64">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">150</font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">27.7 </font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">29.1 </font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">29.1 </font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">33.3 </font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">33.4 </font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">33.3 </font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">30.4 </font></span>
-</p>
-</td>
-</tr><tr style="height:15.75pt;"><td nowrap="nowrap" style="border-width:0px 1pt 1pt;border-style:none solid solid;border-color:rgb(0,0,0);padding:0in 5.4pt;width:48pt;height:15.75pt;background-color:transparent;" width="64">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">175</font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">27.5 </font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">29.1 </font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">29.1 </font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">33.3 </font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">33.5 </font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">33.3 </font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">31.3 </font></span>
-</p>
-</td>
-</tr><tr style="height:15.75pt;"><td nowrap="nowrap" style="border-width:0px 1pt 1pt;border-style:none solid solid;border-color:rgb(0,0,0);padding:0in 5.4pt;width:48pt;height:15.75pt;background-color:transparent;" width="64">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">200</font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">27.4 </font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">29.1 </font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">29.1 </font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">33.3 </font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">33.8 </font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">33.5 </font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">32.4 </font></span>
-</p>
-</td>
-</tr><tr style="height:15.75pt;"><td nowrap="nowrap" style="border-width:0px 1pt 1pt;border-style:none solid solid;border-color:rgb(0,0,0);padding:0in 5.4pt;width:48pt;height:15.75pt;background-color:transparent;" width="64">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">225</font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">27.8 </font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">29.1 </font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">29.2 </font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">33.4 </font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">34.1 </font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">33.8 </font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">33.5 </font></span>
-</p>
-</td>
-</tr><tr style="height:15.75pt;"><td nowrap="nowrap" style="border-width:0px 1pt 1pt;border-style:none solid solid;border-color:rgb(0,0,0);padding:0in 5.4pt;width:48pt;height:15.75pt;background-color:transparent;" width="64">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">250</font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">28.3 </font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">29.1 </font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">29.2 </font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">33.4 </font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">34.6 </font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">34.2 </font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">34.8 </font></span>
-</p>
-</td>
-</tr><tr style="height:15.75pt;"><td nowrap="nowrap" style="border-width:0px 1pt 1pt;border-style:none solid solid;border-color:rgb(0,0,0);padding:0in 5.4pt;width:48pt;height:15.75pt;background-color:transparent;" width="64">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">275</font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">28.6 </font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">29.1 </font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">29.3 </font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">33.5 </font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">35.1 </font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">34.9 </font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">36.0 </font></span>
-</p>
-</td>
-</tr><tr style="height:15.75pt;"><td nowrap="nowrap" style="border-width:0px 1pt 1pt;border-style:none solid solid;border-color:rgb(0,0,0);padding:0in 5.4pt;width:48pt;height:15.75pt;background-color:transparent;" width="64">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">300</font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">28.8 </font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">29.1 </font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">29.4 </font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">33.6 </font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">35.7 </font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">35.7 </font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">37.2 </font></span>
-</p>
-</td>
-</tr><tr style="height:15.75pt;"><td nowrap="nowrap" style="border-width:0px 1pt 1pt;border-style:none solid solid;border-color:rgb(0,0,0);padding:0in 5.4pt;width:48pt;height:15.75pt;background-color:transparent;" width="64">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">350</font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">29.1 </font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">29.2 </font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">29.7 </font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">33.9 </font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">37.1 </font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">37.9 </font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">39.4 </font></span>
-</p>
-</td>
-</tr><tr style="height:15.75pt;"><td nowrap="nowrap" style="border-width:0px 1pt 1pt;border-style:none solid solid;border-color:rgb(0,0,0);padding:0in 5.4pt;width:48pt;height:15.75pt;background-color:transparent;" width="64">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">400</font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">29.2 </font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">29.2 </font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">30.1 </font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">34.3 </font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">38.7 </font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">40.5 </font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">41.3 </font></span>
-</p>
-</td>
-</tr><tr style="height:15.75pt;"><td nowrap="nowrap" style="border-width:0px 1pt 1pt;border-style:none solid solid;border-color:rgb(0,0,0);padding:0in 5.4pt;width:48pt;height:15.75pt;background-color:transparent;" width="64">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">450</font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">29.2 </font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">29.4 </font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">30.6 </font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">34.7 </font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">40.4 </font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">43.4 </font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">43.1 </font></span>
-</p>
-</td>
-</tr><tr style="height:15.75pt;"><td nowrap="nowrap" style="border-width:0px 1pt 1pt;border-style:none solid solid;border-color:rgb(0,0,0);padding:0in 5.4pt;width:48pt;height:15.75pt;background-color:transparent;" width="64">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">500</font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">29.3 </font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">29.6 </font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">31.1 </font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">35.2 </font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">42.0 </font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">46.3 </font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">44.6 </font></span>
-</p>
-</td>
-</tr><tr style="height:15.75pt;"><td nowrap="nowrap" style="border-width:0px 1pt 1pt;border-style:none solid solid;border-color:rgb(0,0,0);padding:0in 5.4pt;width:48pt;height:15.75pt;background-color:transparent;" width="64">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">600</font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">29.3 </font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">30.1 </font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">32.1 </font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">36.3 </font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">45.3 </font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">52.2 </font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">47.3 </font></span>
-</p>
-</td>
-</tr><tr style="height:15.75pt;"><td nowrap="nowrap" style="border-width:0px 1pt 1pt;border-style:none solid solid;border-color:rgb(0,0,0);padding:0in 5.4pt;width:48pt;height:15.75pt;background-color:transparent;" width="64">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">700</font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">29.4 </font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">30.8 </font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">33.0 </font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">37.5 </font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">48.4 </font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">57.8 </font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">49.6 </font></span>
-</p>
-</td>
-</tr><tr style="height:15.75pt;"><td nowrap="nowrap" style="border-width:0px 1pt 1pt;border-style:none solid solid;border-color:rgb(0,0,0);padding:0in 5.4pt;width:48pt;height:15.75pt;background-color:transparent;" width="64">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">800</font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">29.6 </font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">31.4 </font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">33.7 </font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">38.7 </font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">51.2 </font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">62.9 </font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">51.4 </font></span>
-</p>
-</td>
-</tr><tr style="height:15.75pt;"><td nowrap="nowrap" style="border-width:0px 1pt 1pt;border-style:none solid solid;border-color:rgb(0,0,0);padding:0in 5.4pt;width:48pt;height:15.75pt;background-color:transparent;" width="64">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">900</font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">29.9 </font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">32.1 </font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">34.4 </font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">40.0 </font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">53.9 </font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">67.6 </font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">53.0 </font></span>
-</p>
-</td>
-</tr><tr style="height:15.75pt;"><td nowrap="nowrap" style="border-width:0px 1pt 1pt;border-style:none solid solid;border-color:rgb(0,0,0);padding:0in 5.4pt;width:48pt;height:15.75pt;background-color:transparent;" width="64">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">1000</font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">30.2 </font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">32.7 </font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">34.9 </font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
- <span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">41.3 </font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">56.5 </font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">71.8 </font></span>
-</p>
-</td>
-<td nowrap="nowrap" style="border-width:0px 1pt 1pt 0px;border-style:none solid solid none;border-color:rgb(0,0,0) rgb(0,0,0);padding:0in 5.4pt;width:49.25pt;height:15.75pt;background-color:transparent;" width="66">
-<p align="center" style="margin:0in 0in 0pt;text-align:center;line-height:normal;">
-<span style="font-size:10pt;font-family:Verdana, sans-serif;"><font color="#000000">54.3 </font></span>
-</p>
-</td>
-</tr></tbody></table>
+= 20.8</span>
+</td>
+</tr><tr>
+<td nowrap="nowrap" width="64">100</td>
+<td>28.2</td>
+<td>29.1</td>
+<td>29.1</td>
+<td>33.3</td>
+<td>33.3</td>
+<td>33.3</td>
+<td>29.2</td>
+</tr><tr>
+<td>125</td>
+<td>27.9</td>
+<td>29.1</td>
+<td>29.1</td>
+<td>33.3</td>
+<td>33.3</td>
+<td>33.3</td>
+<td>29.7</td>
+</tr><tr>
+<td>150</td>
+<td>27.7</td>
+<td>29.1</td>
+<td>29.1</td>
+<td>33.3</td>
+<td>33.4</td>
+<td>33.3</td>
+<td>30.4</td>
+</tr><tr>
+<td>175</td>
+<td>27.5</td>
+<td>29.1</td>
+<td>29.1</td>
+<td>33.3</td>
+<td>33.5</td>
+<td>33.3</td>
+<td>31.3</td>
+</tr><tr>
+<td>200</td>
+<td>27.4</td>
+<td>29.1</td>
+<td>29.1</td>
+<td>33.3</td>
+<td>33.8</td>
+<td>33.5</td>
+<td>32.4</td>
+</tr><tr>
+<td>225</td>
+<td>27.8</td>
+<td>29.1</td>
+<td>29.2</td>
+<td>33.4</td>
+<td>34.1</td>
+<td>33.8</td>
+<td>33.5</td>
+</tr><tr>
+<td>250</td>
+<td>28.3</td>
+<td>29.1</td>
+<td>29.2</td>
+<td>33.4</td>
+<td>34.6</td>
+<td>34.2</td>
+<td>34.8</td>
+</tr><tr>
+<td>275</td>
+<td>28.6</td>
+<td>29.1</td>
+<td>29.3</td>
+<td>33.5</td>
+<td>35.1</td>
+<td>34.9</td>
+<td>36.0</td>
+</tr><tr>
+<td>300</td>
+<td>28.8</td>
+<td>29.1</td>
+<td>29.4</td>
+<td>33.6</td>
+<td>35.7</td>
+<td>35.7</td>
+<td>37.2</td>
+</tr><tr>
+<td>350</td>
+<td>29.1</td>
+<td>29.2</td>
+<td>29.7</td>
+<td>33.9</td>
+<td>37.1</td>
+<td>37.9</td>
+<td>39.4</td>
+</tr><tr>
+<td>400</td>
+<td>29.2</td>
+<td>29.2</td>
+<td>30.1</td>
+<td>34.3</td>
+<td>38.7</td>
+<td>40.5</td>
+<td>41.3</td>
+</tr><tr>
+<td>450</td>
+<td>29.2</td>
+<td>29.4</td>
+<td>30.6</td>
+<td>34.7</td>
+<td>40.4</td>
+<td>43.4</td>
+<td>43.1</td>
+</tr><tr>
+<td>500</span></td>
+<td>29.3</td>
+<td>29.6</td>
+<td>31.1</td>
+<td>35.2</td>
+<td>42.0</td>
+<td>46.3</td>
+<td>44.6</td>
+</tr><tr>
+<td>600</td>
+<td>29.3</td>
+<td>30.1</td>
+<td>32.1</td>
+<td>36.3</td>
+<td>45.3</td>
+<td>52.2</td>
+<td>47.3</td>
+</tr><tr>
+<td>700</td>
+<td>29.4</td>
+<td>30.8</td>
+<td>33.0</td>
+<td>37.5</td>
+<td>48.4</td>
+<td>57.8</td>
+<td>49.6</td>
+</tr><tr>
+<td>800</td>
+<td>29.6</td>
+<td>31.4</td>
+<td>33.7</td>
+<td>38.7</td>
+<td>51.2</td>
+<td>62.9</td>
+<td>51.4</td>
+</tr><tr>
+<td>900</td>
+<td>29.9</td>
+<td>32.1</td>
+<td>34.4</td>
+<td>40.0</td>
+<td>53.9</td>
+<td>67.6</td>
+<td>53.0</td>
+</tr><tr>
+<td>1000</td>
+<td>30.2</td>
+<td>32.7</td>
+<td>34.9</td>
+<td>41.3</td>
+<td>56.5</td>
+<td>71.8</td>
+<td>54.3</td>
+</tr>
+</tbody></table>
 
 Let’s compute the adiabatic index for Pandora, where we assume the following composition.
 
